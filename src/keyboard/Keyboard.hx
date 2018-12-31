@@ -85,7 +85,7 @@ class KeyListener
 	@:isVar public var key(default, null):Key;
 	@:isVar public var callback(default, null):Function;
 	
-	var params:Array<Function>;
+	var params:Array<Dynamic>;
 	var _shift:Null<Bool>;
 	var _ctrl:Null<Bool>;
 	var _alt:Null<Bool>;
