@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["keyboard", "openfl"],
 	"description": "An alternative way to define keyboard listeners",
-	"version": "1.0.1",
-	"releasenote": "initial release",
+	"version": "1.0.2",
+	"releasenote": "fix ctrl == false modifier",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src/",
 	"dependencies": {

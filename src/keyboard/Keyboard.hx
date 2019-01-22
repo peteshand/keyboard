@@ -123,20 +123,29 @@ class KeyListener
 	
 	public function onKeyDown(e:KeyboardEvent):Void 
 	{
-		var ctrlPass:Bool = _ctrl == null || pass(_ctrl, e.ctrlKey) || pass(_ctrl, e.commandKey) || pass(_ctrl, e.controlKey);
-		if (pass(key, e.keyCode) && pass(_shift, e.shiftKey) && ctrlPass && pass(_alt, e.altKey)) {
-			Keyboard.event = e;
-			callback.dispatch(params);
+		if (pass(key, e.keyCode)) {
+			if (pass(_shift, e.shiftKey) && ctrlPass(e) && pass(_alt, e.altKey)){
+				Keyboard.event = e;
+				callback.dispatch(params);
+			}
 		}
 	}
 	
 	public function onKeyUp(e:KeyboardEvent):Void 
 	{
-		var ctrlPass:Bool = _ctrl == null || pass(_ctrl, e.ctrlKey) || pass(_ctrl, e.commandKey) || pass(_ctrl, e.controlKey);
-		if (pass(key, e.keyCode) && pass(_shift, e.shiftKey) && ctrlPass && pass(_alt, e.altKey)) {
-			Keyboard.event = e;
-			callback.dispatch(params);
+		if (pass(key, e.keyCode)) {
+			if (pass(_shift, e.shiftKey) && ctrlPass(e) && pass(_alt, e.altKey)){
+				Keyboard.event = e;
+				callback.dispatch(params);
+			}
+			
 		}
+	}
+
+	inline function ctrlPass(e:KeyboardEvent)
+	{
+		if (_ctrl == false) return _ctrl == null || (pass(_ctrl, e.ctrlKey) && pass(_ctrl, e.commandKey) && pass(_ctrl, e.controlKey));
+		return _ctrl == null || pass(_ctrl, e.ctrlKey) || pass(_ctrl, e.commandKey) || pass(_ctrl, e.controlKey);
 	}
 	
 	inline function pass(value1:Dynamic, value2:Dynamic) 
