@@ -71,6 +71,8 @@ class Keyboard
 				if (items[i].callback == callback) {
 					items[i].dispose();
 					items.splice(i, 1);
+				} else {
+					i--;
 				}
 			}
 			else {
