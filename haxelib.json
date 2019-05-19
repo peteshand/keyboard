@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["keyboard", "openfl"],
 	"description": "An alternative way to define keyboard listeners",
-	"version": "1.0.3",
-	"releasenote": "fix removePress",
+	"version": "1.0.4",
+	"releasenote": "Add optional descriptions, useful for readme/documentation",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src/",
 	"dependencies": {
