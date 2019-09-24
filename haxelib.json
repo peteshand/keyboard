@@ -4,12 +4,11 @@
 	"license": "MIT",
 	"tags": ["keyboard", "openfl"],
 	"description": "An alternative way to define keyboard listeners",
-	"version": "1.0.4",
-	"releasenote": "Add optional descriptions, useful for readme/documentation",
+	"version": "1.0.7",
+	"releasenote": "Add onDown method, once active will trigger every frame",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src/",
 	"dependencies": {
-		"openfl": "",
 		"utils": ""
 	}
 }

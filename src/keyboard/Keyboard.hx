@@ -1,8 +1,10 @@
 package keyboard;
 
+import time.EnterFrame;
 import keyboard.Key;
 import openfl.Lib;
 import openfl.events.Event;
+import openfl.events.EventType;
 import openfl.events.KeyboardEvent;
 import haxe.Constraints.Function;
 
@@ -12,64 +14,65 @@ using utils.FunctionUtil;
  * ...
  * @author P.J.Shand
  */
-class Keyboard
-{
+class Keyboard {
 	public static var event:KeyboardEvent;
 	static var pressItems = new Array<KeyListener>();
 	static var releaseItems = new Array<KeyListener>();
-	
+
 	static var withDescription = new Map<KeyListener, Bool>();
 	public static var descriptionOutput(get, null):String;
+	public static var descriptionTable(get, null):Dynamic;
 
 	public function new() {}
-	
-	static private function init() 
-	{
+
+	static private function init() {
 		Lib.current.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		Lib.current.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
 	}
-	
-	static private function onKeyDown(e:KeyboardEvent):Void 
-	{
-		for (i in 0...pressItems.length) pressItems[i].onKeyDown(e);
+
+	static private function onKeyDown(e:KeyboardEvent):Void {
+		for (i in 0...pressItems.length)
+			pressItems[i].onKeyDown(e);
 	}
-	
-	static private function onKeyUp(e:KeyboardEvent):Void 
-	{
-		for (i in 0...releaseItems.length) releaseItems[i].onKeyUp(e);
+
+	static private function onKeyUp(e:KeyboardEvent):Void {
+		for (i in 0...releaseItems.length)
+			releaseItems[i].onKeyUp(e);
 	}
-	
-	static public function onPress(?key:Key, callback:Function, params:Array<Dynamic>=null):KeyListener
-	{
+
+	static public function onPress(?key:Key, callback:Function, params:Array<Dynamic> = null):KeyListener {
 		init();
 		var keyboardListener = new KeyListener(key, callback, params);
 		pressItems.push(keyboardListener);
 		return keyboardListener;
 	}
-	
-	static public function onRelease(?key:Key, callback:Function, params:Array<Dynamic>=null):KeyListener
-	{
+
+	static public function onRelease(?key:Key, callback:Function, params:Array<Dynamic> = null):KeyListener {
 		init();
 		var keyboardListener = new KeyListener(key, callback, params);
 		releaseItems.push(keyboardListener);
 		return keyboardListener;
 	}
-	
-	static public function removePress(callback:Function):Void
-	{
+
+	static public function onDown(?key:Key, callback:Function, params:Array<Dynamic> = null):KeyListener {
+		init();
+		var keyDownListener = new KeyDownListener(key, callback, params);
+		pressItems.push(keyDownListener.keyboardListener);
+		releaseItems.push(keyDownListener.keyboardListener);
+		return keyDownListener.keyboardListener;
+	}
+
+	static public function removePress(callback:Function):Void {
 		remove(callback, pressItems);
 	}
-	
-	static public function removeRelease(callback:Function):Void
-	{
+
+	static public function removeRelease(callback:Function):Void {
 		remove(callback, releaseItems);
 	}
-	
-	static inline function remove(callback:Function, items:Array<KeyListener>):Void
-	{
+
+	static inline function remove(callback:Function, items:Array<KeyListener>):Void {
 		var i:Int = items.length - 1;
-		while (i >= 0) 
-		{
+		while (i >= 0) {
 			if (items[i] != null) {
 				if (items[i].callback == callback) {
 					items[i].dispose();
@@ -77,121 +80,169 @@ class Keyboard
 				} else {
 					i--;
 				}
-			}
-			else {
+			} else {
 				i--;
 			}
 		}
 	}
 
-	static function get_descriptionOutput():String
-	{
+	static function get_descriptionOutput():String {
 		var outputArray:Array<String> = [];
-		for (keylistener in Keyboard.withDescription.keys()){
+		for (keylistener in Keyboard.withDescription.keys()) {
 			var key:Int = keylistener.key;
 			var letter:String = KeyMap.keyboardMap[key];
-			outputArray.push("| " + keylistener._description + " | " + letter + " | " + keylistener._ctrl + " | " + keylistener._shift + " | " + keylistener._alt + " |\n");
+			outputArray.push("| " + keylistener._description + " | " + letter + " | " + keylistener._ctrl + " | " + keylistener._shift + " | "
+				+ keylistener._alt + " |\n");
 		}
 		outputArray.sort((o1, o2) -> {
-			if (o1 > o2) return 1;
-			else if (o1 < o2) return -1;
-			else return 0;
+			if (o1 > o2)
+				return 1;
+			else if (o1 < o2)
+				return -1;
+			else
+				return 0;
 		});
 		return outputArray.join("");
+	}
+
+	static function get_descriptionTable():Dynamic {
+		var outputObj:Dynamic = {};
+		for (keylistener in Keyboard.withDescription.keys()) {
+			var key:Int = keylistener.key;
+			var letter:String = KeyMap.keyboardMap[key];
+			var keyModifier:String = "";
+			if (keylistener._ctrl)
+				keyModifier += " + ctrl";
+			if (keylistener._shift)
+				keyModifier += " + shift";
+			if (keylistener._alt)
+				keyModifier += " + alt";
+
+			var item = {
+				description: keylistener._description,
+			}
+			untyped outputObj[letter.toLowerCase() + keyModifier] = item;
+		}
+		return outputObj;
+	}
+}
+
+class KeyDownListener {
+	public var keyboardListener:KeyListener;
+
+	var callback:Function;
+	var params:Array<Dynamic>;
+	var isDown(default, set):Bool;
+
+	public function new(?key:Key, callback:Function, params:Array<Dynamic> = null) {
+		this.callback = callback;
+		this.params = params;
+		keyboardListener = new KeyListener(key, () -> {
+			if (Keyboard.event == null)
+				return;
+			if (Keyboard.event.type == 'keyDown') {
+				isDown = true;
+			} else if (Keyboard.event.type == 'keyUp') {
+				isDown = false;
+			}
+		}, []);
+	}
+
+	function set_isDown(value:Bool):Bool {
+		if (isDown == value)
+			return value;
+		else {
+			isDown = value;
+		}
+		if (isDown) {
+			EnterFrame.add(tick);
+		} else {
+			EnterFrame.remove(tick);
+		}
+		return isDown;
+	}
+
+	function tick() {
+		callback.dispatch(params);
 	}
 }
 
 @:access(keyboard.Keyboard)
-class KeyListener
-{
+class KeyListener {
 	@:isVar public var key(default, null):Key;
 	@:isVar public var _shift(default, null):Null<Bool>;
 	@:isVar public var _ctrl(default, null):Null<Bool>;
 	@:isVar public var _alt(default, null):Null<Bool>;
 	@:isVar public var _description(default, null):String;
 	@:isVar public var callback(default, null):Function;
-	
+
 	var params:Array<Dynamic>;
-	//var _shift:Null<Bool>;
-	//var _ctrl:Null<Bool>;
-	//var _alt:Null<Bool>;
-	//var _description:String;
-	
-	public function new(?key:Key, callback:Function, params:Array<Dynamic>) 
-	{
+
+	public function new(?key:Key, callback:Function, params:Array<Dynamic>) {
 		this.key = key;
 		this.callback = callback;
 		this.params = params;
 	}
-	
-	public function dispose() 
-	{
+
+	public function dispose() {
 		Lib.current.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
 		Lib.current.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
 	}
-	
-	public function shift(value:Null<Bool>):KeyListener
-	{
+
+	public function shift(value:Null<Bool>):KeyListener {
 		_shift = value;
 		return this;
 	}
-	
-	public function ctrl(value:Null<Bool>):KeyListener
-	{
+
+	public function ctrl(value:Null<Bool>):KeyListener {
 		_ctrl = value;
 		return this;
 	}
-	
-	public function alt(value:Null<Bool>):KeyListener
-	{
+
+	public function alt(value:Null<Bool>):KeyListener {
 		_alt = value;
 		return this;
 	}
-	
-	public function description(value:String):KeyListener
-	{
+
+	public function description(value:String):KeyListener {
 		_description = value;
 		Keyboard.withDescription.set(this, true);
 		return this;
 	}
-	
-	public function onKeyDown(e:KeyboardEvent):Void 
-	{
+
+	public function onKeyDown(e:KeyboardEvent):Void {
 		if (pass(key, e.keyCode)) {
-			if (pass(_shift, e.shiftKey) && ctrlPass(e) && pass(_alt, e.altKey)){
+			if (pass(_shift, e.shiftKey) && ctrlPass(e) && pass(_alt, e.altKey)) {
 				Keyboard.event = e;
 				callback.dispatch(params);
 			}
-		}
-	}
-	
-	public function onKeyUp(e:KeyboardEvent):Void 
-	{
-		if (pass(key, e.keyCode)) {
-			if (pass(_shift, e.shiftKey) && ctrlPass(e) && pass(_alt, e.altKey)){
-				Keyboard.event = e;
-				callback.dispatch(params);
-			}
-			
 		}
 	}
 
-	inline function ctrlPass(e:KeyboardEvent)
-	{
-		if (_ctrl == false) return _ctrl == null || (pass(_ctrl, e.ctrlKey) && pass(_ctrl, e.commandKey) && pass(_ctrl, e.controlKey));
+	public function onKeyUp(e:KeyboardEvent):Void {
+		if (pass(key, e.keyCode)) {
+			if (pass(_shift, e.shiftKey) && ctrlPass(e) && pass(_alt, e.altKey)) {
+				Keyboard.event = e;
+				callback.dispatch(params);
+			}
+		}
+	}
+
+	inline function ctrlPass(e:KeyboardEvent) {
+		if (_ctrl == false)
+			return _ctrl == null || (pass(_ctrl, e.ctrlKey) && pass(_ctrl, e.commandKey) && pass(_ctrl, e.controlKey));
 		return _ctrl == null || pass(_ctrl, e.ctrlKey) || pass(_ctrl, e.commandKey) || pass(_ctrl, e.controlKey);
 	}
-	
-	inline function pass(value1:Dynamic, value2:Dynamic) 
-	{
-		if (value1 == value2 || value1 == null) return true;
+
+	inline function pass(value1:Dynamic, value2:Dynamic) {
+		if (value1 == value2 || value1 == null)
+			return true;
 		return false;
 	}
 }
 
 // only used for descriptionOutput
-class KeyMap
-{
+class KeyMap {
 	public static var keyboardMap:Array<String> = [
 		"", // [0]
 		"", // [1]
