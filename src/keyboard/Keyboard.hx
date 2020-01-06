@@ -1,5 +1,6 @@
 package keyboard;
 
+#if openfl
 import time.EnterFrame;
 import keyboard.Key;
 import openfl.Lib;
@@ -8,6 +9,7 @@ import openfl.events.EventType;
 import openfl.events.KeyboardEvent;
 import haxe.Constraints.Function;
 
+import utils.GcoArray;
 using utils.FunctionUtil;
 
 /**
@@ -23,6 +25,8 @@ class Keyboard {
 	public static var descriptionOutput(get, null):String;
 	public static var descriptionTable(get, null):Dynamic;
 
+	static var calls = new GcoArray<KeyboardEvent -> Void>([]);
+
 	public function new() {}
 
 	static private function init() {
@@ -31,13 +35,21 @@ class Keyboard {
 	}
 
 	static private function onKeyDown(e:KeyboardEvent):Void {
+		calls.length = 0;
 		for (i in 0...pressItems.length)
-			pressItems[i].onKeyDown(e);
+			calls.push(pressItems[i].onKeyDown);
+		for (j in 0...calls.length){
+			calls[j](e);
+		}
 	}
 
 	static private function onKeyUp(e:KeyboardEvent):Void {
+		calls.length = 0;
 		for (i in 0...releaseItems.length)
-			releaseItems[i].onKeyUp(e);
+			calls.push(releaseItems[i].onKeyUp);
+		for (j in 0...calls.length){
+			calls[j](e);
+		}
 	}
 
 	static public function onPress(?key:Key, callback:Function, params:Array<Dynamic> = null):KeyListener {
@@ -502,3 +514,4 @@ class KeyMap {
 		"" // [255]
 	];
 }
+#end

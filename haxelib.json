@@ -4,8 +4,8 @@
 	"license": "MIT",
 	"tags": ["keyboard", "openfl"],
 	"description": "An alternative way to define keyboard listeners",
-	"version": "1.0.7",
-	"releasenote": "Add onDown method, once active will trigger every frame",
+	"version": "1.0.8",
+	"releasenote": "delay calling onKeyDown and onKeyUp until all listens have been stored",
 	"contributors": [ "p.j.shand" ],
 	"classPath": "src/",
 	"dependencies": {
