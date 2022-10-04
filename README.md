@@ -1,6 +1,6 @@
 ## Overview
 
-This library offers an alternative way to define keyboard listeners. Currently the library only supports openfl based appplications. Rather than listening to a keyboard event and then filtering for switch key is pressed in the callback function, this is defined when the listener is added.
+This library offers an alternative way to define keyboard listeners. Currently the library only supports openfl based applications. Rather than listening to a keyboard event and then filtering for switch key is pressed in the callback function, this is defined when the listener is added.
 
 The following example adds a keyboard listener for when the "Enter" is pressed.
 
@@ -23,7 +23,7 @@ Keyboard.onRelease(Key.ENTER, () -> {
 } );
 ```
 
-If you want to add ctrl, alt, shirt modifiers these can be daisy chained after the onPress or onRelease functions. The following example will be triggered when the A key is pressed while both Shift and Ctrl are held down and Alt is not.
+If you want to add ctrl, alt, shift modifiers these can be easily chained after the onPress or onRelease functions. The following example will be triggered when the A key is pressed while both Shift and Ctrl are held down and Alt is not.
 
 ```
 Keyboard.onPress(Key.A, () -> {
@@ -31,7 +31,7 @@ Keyboard.onPress(Key.A, () -> {
 } ).shift(true).ctrl(true).alt(false);
 ```
 
-If a modifier is not set then the callback will be triggered regardless of it the modifier is being pressed or not. So in the below case the callback will be triggered when the A key is pressed while both Shift and Ctrl are held down and Alt is pressed or not pressed.
+If a modifier is not set then the callback will be triggered regardless of if the modifier is being pressed or not. So in the below case, the callback will be triggered when the A key is pressed while both Shift and Ctrl are held down and Alt is pressed or not pressed.
 
 
 ```
